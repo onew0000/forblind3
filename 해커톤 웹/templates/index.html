@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>스마트 지팡이</title>
+    <style>
+        * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #c084fc, #8b5cf6);
+}
+
+.container {
+    width: 100%;
+    max-width: 1200px;
+    display: flex;
+    align-items: start;
+    gap: 2rem;
+    padding: 1.5rem;
+}
+
+.left-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.right-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.status-box {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 1.5rem;
+    padding: 1.875rem;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.status-info {
+    margin-top: 1rem;
+}
+
+.status-info p {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0.5rem 0;
+}
+
+.status-info span {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-weight: 600;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.timestamp {
+    font-size: 0.875rem;
+    color: rgba(255, 255, 255, 0.7);
+    text-align: center;
+    margin-top: 0.5rem;
+}
+
+.status-dot {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    margin: 0 auto 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 0 20px rgba(74, 222, 128, 0.4);
+    position: relative;
+    animation: pulse-dot 2s infinite;
+}
+
+@keyframes pulse-dot {
+    0% { transform: scale(0.95); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(0.95); }
+}
+
+.status-dot::after {
+    content: '';
+    position: absolute;
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(0.95);
+        opacity: 0.8;
+    }
+    70% {
+        transform: scale(1.1);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(0.95);
+        opacity: 0;
+    }
+}
+
+.distance-value {
+    font-size: 36px;
+    color: white;
+    font-weight: 600;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 0.625rem;
+    animation: fade-in 0.5s ease;
+}
+
+.status-label {
+    color: white;
+    font-size: 16px;
+    margin-top: 0.625rem;
+    opacity: 0.9;
+    animation: fade-in 0.5s ease 0.2s forwards;
+}
+
+.vibration-status {
+    color: white;
+    font-size: 14px;
+    margin-top: 0.625rem;
+    opacity: 0.8;
+    animation: fade-in 0.5s ease 0.4s forwards;
+}
+
+.info-box {
+    background-color: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    animation: slide-up 0.5s ease;
+}
+
+.info-box p {
+    color: white;
+    font-size: 16px;
+    margin: 0.3125rem 0;
+}
+
+.info-box span {
+    font-weight: 600;
+}
+
+.map-container {
+    width: 100%;
+    height: 400px;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    animation: slide-up 0.5s ease 0.2s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+}
+
+.start-button {
+    background-color: white;
+    color: #8b5cf6;
+    border: none;
+    padding: 1.125rem 3rem;
+    border-radius: 1.875rem;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    animation: slide-up 0.5s ease 0.4s;
+    opacity: 0;
+    animation-fill-mode: forwards;
+}
+
+.start-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.start-button:active {
+    transform: translateY(1px);
+}
+
+@media (max-width: 1024px) {
+    .container {
+        flex-direction: column;
+        max-width: 600px;
+    }
+    
+    .left-section,
+    .right-section {
+        width: 100%;
+    }
+    
+    .map-container {
+        height: 300px;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 1rem;
+    }
+
+    .status-box {
+        padding: 1.25rem;
+    }
+
+    .status-dot {
+        width: 100px;
+        height: 100px;
+    }
+
+    .distance-value {
+        font-size: 32px;
+    }
+
+    .status-label {
+        font-size: 14px;
+    }
+
+    .vibration-status {
+        font-size: 12px;
+    }
+
+    .info-box {
+        padding: 1rem;
+    }
+
+    .info-box p {
+        font-size: 14px;
+    }
+
+    .map-container {
+        height: 250px;
+    }
+
+    .start-button {
+        padding: 1rem 2.5rem;
+        font-size: 16px;
+    }
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="status-box">
+            <div class="status-dot">
+                <span id="distance" class="distance-value">-- cm</span>
+            </div>
+            <div id="status-label" class="status-label">대기 중</div>
+            <div id="vibration-status" class="vibration-status"></div>
+        </div>
+        <div class="info-box">
+            <p>현재 감지된 거리: <span id="distance-value">{{ distance }} cm</span></p>
+            <p>현재 감지된 색상: <span id="color-value">{{ color }}</span></p>
+        </div>
+        <div class="info-box status-info">
+            <p>지팡이 상태: <span id="stick-status">정상</span></p>
+            <p>긴급 알림: <span id="email-status">대기중</span></p>
+            <p class="timestamp" id="last-email-time"></p>
+        </div>
+        <div class="map-container">
+            <div id="map"></div>
+        </div>
+        
+        <button class="start-button" onclick="toggleDetection()">탐지 시작</button>
+    </div>
+    <script async
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC-4-V_q2f5C_ZdYMndMFhjRiLgzB6uFos&loading=async&callback=initMap">
+</script>
+    <script>
+
+        let isDetecting = false;
+let updateInterval;
+let lastVibration = 0;
+const VIBRATION_COOLDOWN = 500;
+let lastPlayTime = 0;
+let isPlayingDistance = true;
+const PLAY_INTERVAL = 10000;
+let currentAudio = null;
+
+function checkVibrationSupport() {
+    if ('vibrate' in navigator) {
+        document.getElementById('vibration-status').textContent = '진동 지원됨';
+        return true;
+    } else {
+        document.getElementById('vibration-status').textContent = '이 기기는 진동을 지원하지 않습니다';
+        return false;
+    }
+}
+
+function vibrateByDistance(distance) {
+    const now = Date.now();
+    if (now - lastVibration < VIBRATION_COOLDOWN) return;
+    
+    if ('vibrate' in navigator) {
+        if (distance <= 10) {
+            navigator.vibrate([200, 100, 200, 100, 200]);
+        } else if (distance <= 20) {
+            navigator.vibrate([150, 100, 150]);
+        } else if (distance <= 30) {
+            navigator.vibrate([100]);
+        }
+        lastVibration = now;
+    }
+}
+
+function toggleDetection() {
+    isDetecting = !isDetecting;
+    const button = document.querySelector('.start-button');
+    const statusLabel = document.getElementById('status-label');
+    
+    if (isDetecting) {
+        button.textContent = '탐지 중지';
+        button.style.backgroundColor = '#dc2626';
+        button.style.color = 'white';
+        button.style.transform = 'translateY(-2px)';
+        button.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.15)';
+        statusLabel.textContent = '탐지 중...';
+        checkVibrationSupport();
+        startDetection();
+        initMap();
+    } else {
+        button.textContent = '탐지 시작';
+        button.style.backgroundColor = 'white';
+        button.style.color = '#8b5cf6';
+        button.style.transform = 'translateY(0)';
+        button.style.boxShadow = '0 4px 15px rgba(0, 0, 0, 0.1)';
+        statusLabel.textContent = '대기 중';
+        stopDetection();
+    }
+}
+
+function updateUIStatus(distance, statusDot, statusLabel) {
+    if (distance <= 10) {
+        statusDot.style.backgroundColor = '#dc2626';
+        statusDot.style.boxShadow = '0 0 20px rgba(220, 38, 38, 0.4)';
+        statusLabel.textContent = '매우 가까움!';
+    } else if (distance <= 20) {
+        statusDot.style.backgroundColor = '#f59e0b';
+        statusDot.style.boxShadow = '0 0 20px rgba(245, 158, 11, 0.4)';
+        statusLabel.textContent = '가까움';
+    } else if (distance <= 30) {
+        statusDot.style.backgroundColor = '#3b82f6';
+        statusDot.style.boxShadow = '0 0 20px rgba(59, 130, 246, 0.4)';
+        statusLabel.textContent = '주의';
+    } else {
+        statusDot.style.backgroundColor = '#4ade80';
+        statusDot.style.boxShadow = '0 0 20px rgba(74, 222, 128, 0.4)';
+        statusLabel.textContent = '안전 거리';
+    }
+}
+
+function updateDistance() {
+    if (!isDetecting) return;
+
+    fetch('/get_distance_and_color')
+        .then(response => response.json())
+        .then(data => {
+            const distance = data.distance;
+            const color = data.color;
+            const currentTime = Date.now();
+            
+            // 거리 및 색상 정보 업데이트
+            document.getElementById('distance').textContent = `${distance} cm`;
+            document.getElementById('distance-value').textContent = `${distance} cm`;
+            document.getElementById('color-value').textContent = color;
+            
+            // UI 상태 업데이트
+            const statusDot = document.querySelector('.status-dot');
+            const statusLabel = document.getElementById('status-label');
+            updateUIStatus(distance, statusDot, statusLabel);
+            
+            // 진동 처리
+            if (distance <= 30) {
+                vibrateByDistance(distance);
+            }
+            
+            // 소리 처리
+            if (currentTime - lastPlayTime >= PLAY_INTERVAL) {
+                if (isPlayingDistance) {
+                    playDistanceSound(distance, data.audio_urls);
+                } else {
+                    playWarningSound(color, data.audio_urls);
+                }
+                isPlayingDistance = !isPlayingDistance;
+                lastPlayTime = currentTime;
+            }
+            
+            // 지팡이 상태 업데이트
+            if (data.stick_broken) {
+                document.getElementById('stick-status').textContent = '손상됨';
+                document.getElementById('stick-status').style.color = '#dc2626';
+                
+                if (data.email_sent) {
+                    document.getElementById('email-status').textContent = '발송완료';
+                    document.getElementById('email-status').style.color = '#4ade80';
+                    document.getElementById('last-email-time').textContent = 
+                        `마지막 발송: ${new Date(data.last_email_time).toLocaleString()}`;
+                }
+            } else {
+                document.getElementById('stick-status').textContent = '정상';
+                document.getElementById('stick-status').style.color = '#4ade80';
+                document.getElementById('email-status').textContent = '대기중';
+                document.getElementById('email-status').style.color = '#3b82f6';
+            }
+
+            // 애니메이션 효과
+            statusDot.style.animation = 'pulse-dot 2s infinite';
+            statusLabel.style.animation = 'fade-in 0.5s ease 0.2s forwards';
+            document.getElementById('vibration-status').style.animation = 'fade-in 0.5s ease 0.4s forwards';
+        })
+        .catch(error => {
+            console.error('데이터 업데이트 실패:', error);
+        });
+}
+
+function playDistanceSound(distance, audioUrls) {
+    if (distance <= 10) {
+        playSound(audioUrls.distance_10);
+    } else if (distance <= 20) {
+        playSound(audioUrls.distance_20);
+    } else if (distance <= 30) {
+        playSound(audioUrls.distance_30);
+    }
+}
+
+function playWarningSound(color, audioUrls) {
+    if (color === "red") {
+        playSound(audioUrls.red_signal);
+    } else if (color === "green") {
+        playSound(audioUrls.green_signal);
+    } else {
+        playSound(audioUrls.other_signal);
+    }
+}
+
+function playSound(soundPath) {
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+    }
+    
+    const audio = new Audio(soundPath);
+    currentAudio = audio;
+    
+    audio.play().catch(error => {
+        console.error('오디오 재생 실패:', error);
+    });
+}
+
+function startDetection() {
+    isPlayingDistance = true;
+    lastPlayTime = 0;
+    updateInterval = setInterval(updateDistance, 500);
+}
+
+function stopDetection() {
+    clearInterval(updateInterval);
+    document.getElementById('distance').textContent = '-- cm';
+    document.getElementById('distance-value').textContent = '-- cm';
+    document.getElementById('color-value').textContent = '--';
+    
+    const statusDot = document.querySelector('.status-dot');
+    statusDot.style.backgroundColor = '#4ade80';
+    statusDot.style.boxShadow = '0 0 20px rgba(74, 222, 128, 0.4)';
+    statusDot.style.animation = 'none';
+    
+    if (currentAudio) {
+        currentAudio.pause();
+        currentAudio.currentTime = 0;
+    }
+    
+    if ('vibrate' in navigator) {
+        navigator.vibrate(0);
+    }
+}
+
+function initMap() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                
+                const map = new google.maps.Map(document.getElementById('map'), {
+                    center: { lat, lng },
+                    zoom: 15
+                });
+                
+                const marker = new google.maps.Marker({
+                    position: { lat, lng },
+                    map: map,
+                    title: '현재 위치'
+                });
+            },
+            (error) => {
+                console.error('위치 정보를 가져올 수 없습니다:', error);
+            }
+        );
+    } else {
+        console.error('브라우저가 위치 정보 서비스를 지원하지 않습니다.');
+    }
+}
+
+// 페이지 로드 시 진동 지원 여부 확인
+window.addEventListener('load', checkVibrationSupport);
+        
+    </script>
+
+</body>
+<html>
